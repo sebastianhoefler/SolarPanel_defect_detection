@@ -42,3 +42,14 @@ The code in `trainer.py`  defines a Trainer class, designed for training a deep 
 * **Training Execution (fit)**: Manages the overall training process across multiple epochs, handling early stopping, and logging results until completion or early termination based on the specified conditions.
 
 The model should be run from `train.py`. Here, we can set the hyperparameters for training. Since there is a very big class imbalence, we oversample the minority class (undersample the majority class) to improve generalization. 
+
+## Results
+
+Here are the performance outcomes of the best model implementation:
+
+| Dataset                  | Average F1-Score |
+|--------------------------|------------------|
+| Training Set             | 0.915            |
+| **Hidden Challenge Set** | **0.909**        |
+
+Before the challenge was taken offline, this repository ranked **second overall**.
