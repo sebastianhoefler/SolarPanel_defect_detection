@@ -18,13 +18,13 @@ The dataset used in this project is a subset of the [ELPV dataset](https://githu
 Left: Crack on a polycrystalline module; Middle: Inactive region; Right: Cracks and
 inactive regions on a monocrystalline module
 
-![alt text](<Screenshot 2024-04-18 at 17.08.06.png>)
+![alt text](<images/sample_images.png>)
 
 ## Usage
 
 `data.py` includes the data loader and performs augmentations for the training data. The transforms (augmentations) from torchvision were carefully chosen to fit the structure of the data. A sample of augmented images is displayed below.
 
-![alt text](3b036d52-2f0d-4c50-b125-789f584213fc.png)
+![alt text](<images/sample_aug_images.png>)
 
 
 The code in `trainer.py`  defines a Trainer class, designed for training a deep learning model in PyTorch. It includes detailed methods for handling model training, validation/testing, logging, and checkpoint management. Here's a breakdown of its core functionalities:
