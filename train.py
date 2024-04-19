@@ -64,7 +64,7 @@ train_data = DataLoader(ChallengeDataset(train_set, 'train'), batch_size=16, shu
 test_data = DataLoader(ChallengeDataset(val_set, 'val'), batch_size=16, shuffle=True)
 
 # create an instance of our ResNet model
-model = resnet34(weights='DEFAULT') #pretrained. Maybe try IMAGENET1k_V2 later?
+model = resnet34(weights='DEFAULT') 
 
 # make sure the parameters are trainable
 for param in model.parameters():

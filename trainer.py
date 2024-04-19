@@ -6,9 +6,11 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 from tqdm import tqdm
+import os
 
-
+# Model was trained locally on apple silicon since we only train 20-50 epochs
 # change if you do not want to train on apple silicon
+
 mps_device = torch.device("mps")
 
 class Trainer:
@@ -17,7 +19,7 @@ class Trainer:
                  model,                        # Model to be trained.
                  crit,                         # Loss function
                  optim=None,                   # Optimizer
-                 scheduler=None,             # Scheduler for the LR
+                 scheduler=None,               # Scheduler for the LR
                  train_dl=None,                # Training data set
                  val_test_dl=None,             # Validation (or test) data set
                  cuda=True,                    # Whether to use the GPU
@@ -32,12 +34,14 @@ class Trainer:
 
         self._early_stopping_patience = early_stopping_patience
         
-        #Tensorboard logging and checkpoint save
+        # set yor directory
+        new_working_directory = "/Users/sebh/Desktop/GithubProjectDL/SolarPanel_defect_detection"
+        os.chdir(new_working_directory)
+        
+        # Tensorboard logging and checkpoint save
         log_dir = f"runs/train_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self._writer = SummaryWriter(log_dir=log_dir)
-        
-
-
+    
         # change to cude if you do not want to train on apple silicon
         if cuda:
             # self._model = model.cuda()
@@ -45,18 +49,15 @@ class Trainer:
             self._model = model.to(mps_device)
             self._crit = crit.to(mps_device)
             
-            
+            #checkpoints
   
     def save_checkpoint(self, epoch):
         checkpoint_file = f"{self._writer.log_dir}/checkpoint_{epoch}.ckp"
         torch.save({'state_dict': self._model.state_dict()}, checkpoint_file)
 
-    
     def restore_checkpoint(self, epoch_n):
-        #ckp = torch.load('/Users/sebh/Developer/Pytorch_Challenge/checkpoints/checkpoint_{:03d}.ckp'.format(epoch_n), 'cuda' if self._cuda else None)
-        #ckp = torch.load(f'/Users/sebh/Developer/Pytorch_Challenge/checkpoints/checkpoint_{epoch_n}.ckp', map_location=torch.device('cpu'))
-        ckp = torch.load(f'/Users/sebh/Developer/Pytorch_Challenge/src_to_implement/runs/train_best2_load/checkpoint_{epoch_n}.ckp', map_location=torch.device('cpu'))
-
+        # specify the name (path) of the checkpoint you would like to load
+        ckp = torch.load(f'runs/train_best2_load/checkpoint_{epoch_n}.ckp', map_location=torch.device('cpu'))
         self._model.load_state_dict(ckp['state_dict'])
         
     def save_onnx(self, fn):
@@ -64,7 +65,7 @@ class Trainer:
         m.eval()
         x = torch.randn(1, 3, 300, 300, requires_grad=True)
         y = self._model(x)
-        torch.onnx.export(m,                 # model being run
+        torch.onnx.export(m,             # model being run
               x,                         # model input (or a tuple for multiple inputs)
               fn,                        # where to save the model (can be a file or file-like object)
               export_params=True,        # store the trained parameter weights inside the model file
@@ -103,20 +104,18 @@ class Trainer:
     def train_epoch(self):
         running_loss = 0.0
         n_batches = 0
-
         self._model.train()
         self._train_dl.mode = "train"
 
-
-
         for inputs, labels in self._train_dl:
+            
             #inputs, labels = (inputs.cuda(), labels.cuda()) if self._cuda else (inputs, labels)
             inputs, labels = (inputs.to(mps_device), labels.to(mps_device)) if self._cuda else (inputs, labels)
+            
             # Transfer the batch to the GPU if it's available
             #inputs = inputs.to(self._cuda) #specify mps device later
             #labels = labels.to(self._cuda)
 
-            # perform a training step
             loss = self.train_step(inputs, labels)
             running_loss += loss
 
@@ -127,10 +126,9 @@ class Trainer:
             scheduler.step()
 
         #self._scheduler.step()
-
         avg_loss = running_loss / n_batches
 
-        self._writer.add_scalar('Loss/train', avg_loss, self.epoch_counter)  # log the training loss to TensorBoard
+        self._writer.add_scalar('Loss/train', avg_loss, self.epoch_counter)
         
         return avg_loss
     
@@ -143,32 +141,21 @@ class Trainer:
         self._val_test_dl.mode = "val"
 
         with torch.no_grad():
-            # iterate through the validation set
             for inputs, labels in self._val_test_dl:
                 #inputs, labels = (inputs.cuda(), labels.cuda()) if self._cuda else (inputs, labels)
                 inputs, labels = (inputs.to(mps_device), labels.to(mps_device)) if self._cuda else (inputs, labels)
+                
                 # transfer the batch to the gpu if given
                 label_list.append(labels.cpu().numpy())
     
-                # perform a validation step
                 loss, preds = self.val_test_step(inputs, labels)
-                print(preds.shape)
-                # threshold the predictions to get binary output
-                #preds_bin = (preds > 0.5).float()
-
                 pred_list.append(np.around(preds.cpu().numpy()))
-                #pred_list.append(torch.round(preds.cpu()))
 
                 running_loss += loss
-
-        #print('np.array(pred_list):', np.array(pred_list).shape)
 
         return self.loss_metrics(running_loss, np.array(pred_list), np.array(label_list))
 
 
-
-
-    
     def loss_metrics(self, sum_loss, out_pred, out_true):
         # calculate the average loss and average metrics of your choice. 
         # You might want to calculate these metrics in designated functions
@@ -190,11 +177,13 @@ class Trainer:
 
         return avg_loss, f1_mean, f1_crack, f1_inactive
 
-        
-    
-
     def fit(self, epochs=-1):
-        self.restore_checkpoint(7)
+        
+        # Commented out to prevent restoring from a checkpoint
+        # specify epoch number from which you want to restore the model's state.
+        # You can only restore from epochs that you saved!
+        #self.restore_checkpoint(7)
+        
         assert self._early_stopping_patience > 0 or epochs > 0
         self.epoch_counter = 0
         train_loss = []
