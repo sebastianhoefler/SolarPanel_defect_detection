@@ -3,6 +3,7 @@
 <p><strong><span style="font-size: larger;">Author:</span></strong> <a href="https://github.com/sebastianhoefler" style="font-size: larger;">Sebastian Hoefler</a></p>
 
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/) 
+
 This project is based on the Deep Learning challenge that was part of the Deep Learning course (SS 23) offered by the [Pattern Recognition Lab](https://lme.tf.fau.de/). The lecture videos for this course are available as a recording from Prof. Dr.-Ing. habil. Andreas Maier [here](https://www.youtube.com/watch?v=SCFToE1vM2U&list=PLpOGQvPCDQzvJEPFUQ3mJz72GJ95jyZTh). 
 
 ## Overview
