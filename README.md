@@ -21,6 +21,7 @@ inactive regions on a monocrystalline module
 ![alt text](<sample_images/sample_images.png>)
 
 ## Usage
+A jupyter notebook [DEMO](demo.ipynb) is available
 
 `data.py` includes the data loader and performs augmentations for the training data. The transforms (augmentations) from torchvision were carefully chosen to fit the structure of the data. A sample of augmented images is displayed below.
 
